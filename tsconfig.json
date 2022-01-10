@@ -1,8 +1,9 @@
 {
   "compilerOptions": {
+    "moduleResolution": "node",
     "strict": true,
-    "module": "commonjs",
     "declaration": true,
     "target": "es6"
-  }
+  },
+  "exclude": ["git-package"]
 }
