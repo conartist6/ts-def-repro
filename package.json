@@ -5,9 +5,6 @@
   "license": "MIT",
   "dependencies": {
     "typescript": "^4.5.4",
-    "git-package": "./git-package"
-  },
-  "scripts": {
-    "postinstall": "rm -rf node_modules/git-package & cp -R git-package node_modules"
+    "git-package": "github:conartist6/ts-git-package"
   }
 }

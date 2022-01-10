@@ -1,6 +1,6 @@
 ## Typescript repro: unsound typedef resolution logic
 
-We have a base package (`/`) and a git package (`/node_modules/git-package`). I've checked both of them into one git repo to make it easy to browse and because this does not affect the behavior. To run the repro `npm install` in the base package to set things up.
+We have a base package (this package) and a [git package](https://github.com/conartist6/ts-git-package) -- which is to say a git repository usable by as a package by npm. Note that `ts-git-package` contains some intentional errors simulating stale build output.
 
 The goal of this work is to allow git repos to contain checked in built files alongside sources. This is perhaps contraversial, but is extremely powerful in practice as it allows git repos and particularly forks to be used as npm packages. A simple fork > change > build > push > use workflow is sufficient to evolve such a package, whereas a package that can only be used in its published form requires additional steps like changing the package name in the fork, publishing under the new name, changing all usages to the new name, and then eventually reverting all those changes when the needed change is merged upstream.
 
@@ -8,7 +8,7 @@ The goal of this work is to allow git repos to contain checked in built files al
 
 - Typescript evaluates `/node_modules/git-package/main.ts` in accordance with `/tsconfig.json` (as opposed to `/node_modules/git-package/tsconfig.json`). This causes an error at `main.ts:1:14`: `Type 'null' is not assignable to type 'string'.` Loose nulls are permitted in `/node_modules/git-package/tsconfig.json` so this is a false positive error.
 
-- Typescript jumps from compiled code into uncompiled code!! The resolution path looks like this: `/index.js` > `/node_modules/git-package/package.json#types` > `/node_modules/git-package/index.d.ts` > `/node_modules/git-package/main.ts`. Notice the jump from `.d.ts` to `.ts` due to typescript's module resolution order, which always prefers `.ts` extensions to `.d.ts` extensions, when in fact it **never should**.
+- Typescript jumps from compiled code into uncompiled code!! The resolution path looks like this: `ts-def-repro/index.js` > `git-package/package.json#types` > `git-package/index.d.ts` > `git-package/main.ts`. Notice the jump from `.d.ts` to `.ts` due to typescript's module resolution order, which always prefers `.ts` extensions to `.d.ts` extensions, when in fact it **never should**.
 
 - `git-package` has been published without being built. This is causing typescript to fail to report a real error: an undefined export called `unbuiltExport` is being used. Evaluating this code will cause an unexpected error, but it is invisible to typescript because typescript evaluates type definitions from sources but then runs built `js` code.
 
